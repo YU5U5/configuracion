@@ -1,14 +1,14 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
-# Manager personalizado para el modelo de usuario
+# Manager personalizado
 class UsuarioManage(BaseUserManager):
     def create_user(self, correo_electronico, nombre, password=None, **extra_fields):
         if not correo_electronico:
             raise ValueError('El correo electrónico es obligatorio')
         correo_electronico = self.normalize_email(correo_electronico)
         usuario = self.model(correo_electronico=correo_electronico, nombre=nombre, **extra_fields)
-        usuario.set_password(password)  # Hashea la contraseña
+        usuario.set_password(password)  # Usamos el método para hashear la contraseña
         usuario.save(using=self._db)
         return usuario
     
@@ -20,25 +20,24 @@ class UsuarioManage(BaseUserManager):
 
 class Usuario(AbstractBaseUser):
     ESTADO = [
-        ('Activo', 'Activo'),
-        ('Inactivo', 'Inactivo'),
+        ('activo', 'Activo'),
+        ('pendiente_verificacion', 'Pendiente de Verificación'),
     ]
 
-    nombre = models.CharField(max_length=100)
-    correo_electronico = models.EmailField(unique=True)
-    estado = models.CharField(max_length=10, choices=ESTADO, default='Activo')
-    fecha_registro = models.DateTimeField(auto_now_add=True)
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
-    is_superuser = models.BooleanField(default=False)
+    nombre = models.CharField(max_length=100)  # 'NOT NULL' por defecto
+    correo_electronico = models.EmailField(unique=True)  # 'NOT NULL' por defecto
+    estado = models.CharField(max_length=30, choices=ESTADO, default='activo')  # 'NOT NULL' por defecto
+    fecha_registro = models.DateTimeField(auto_now_add=True)  # 'NOT NULL' por defecto
 
+    # Usamos el manager personalizado
     objects = UsuarioManage()
 
     USERNAME_FIELD = 'correo_electronico'
-    REQUIRED_FIELDS = ['nombre']
+    REQUIRED_FIELDS = ['nombre']  # 'nombre' es obligatorio en el formulario de creación
 
     def __str__(self):
         return self.nombre
-    
+
     class Meta:
-        db_table = 'usuario'
+        db_table = 'usuario'  # Aseguramos que se usa la tabla 'usuario'
+        managed = False  # Evitamos que Django intente crear la tabla

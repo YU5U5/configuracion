@@ -1,17 +1,13 @@
 from django.http import JsonResponse
-from django.contrib.auth import get_user_model
-from django.views.decorators.csrf import csrf_exempt
-import json
+from rest_framework.decorators import api_view
 from .serializers import UsuarioSerializer
 
-User = get_user_model()
-
-@csrf_exempt
+@api_view(['POST'])
 def registro(request):
     if request.method == 'POST':
         try:
             # Cargamos los datos JSON
-            data = json.loads(request.body)
+            data = request.data  # Usamos 'request.data' en lugar de 'request.body'
 
             # Usamos el serializer para validar y crear el usuario
             serializer = UsuarioSerializer(data=data)
@@ -25,9 +21,9 @@ def registro(request):
                 # Si los datos no son válidos, devolvemos los errores
                 return JsonResponse({'error': 'Datos inválidos', 'details': serializer.errors}, status=400)
 
-        except json.JSONDecodeError:
-            # Si no es un JSON válido, devolvemos el error correspondiente
-            return JsonResponse({'error': 'JSON inválido'}, status=400)
+        except Exception as e:
+            # Capturamos cualquier otro tipo de error
+            return JsonResponse({'error': str(e)}, status=400)
 
     # Si no es un POST, retornamos error 405 (Método no permitido)
     return JsonResponse({'error': 'Método no permitido'}, status=405)
