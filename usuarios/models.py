@@ -17,7 +17,6 @@ class UsuarioManage(BaseUserManager):
         extra_fields.setdefault("is_superuser", True)
         return self.create_user(correo_electronico, nombre, password, **extra_fields)
 
-
 class Usuario(AbstractBaseUser):
     ESTADO = [
         ('activo', 'Activo'),
@@ -28,6 +27,7 @@ class Usuario(AbstractBaseUser):
     correo_electronico = models.EmailField(unique=True)  # 'NOT NULL' por defecto
     estado = models.CharField(max_length=30, choices=ESTADO, default='activo')  # 'NOT NULL' por defecto
     fecha_registro = models.DateTimeField(auto_now_add=True)  # 'NOT NULL' por defecto
+    last_login = models.DateTimeField(null=True, blank=True)  # Agregamos el campo last_login
 
     # Usamos el manager personalizado
     objects = UsuarioManage()
@@ -40,4 +40,4 @@ class Usuario(AbstractBaseUser):
 
     class Meta:
         db_table = 'usuario'  # Aseguramos que se usa la tabla 'usuario'
-        managed = False  # Evitamos que Django intente crear la tabla
+        managed = False # Cambiamos a True para que Django gestione la tabla

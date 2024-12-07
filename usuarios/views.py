@@ -1,8 +1,10 @@
 from django.http import JsonResponse
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view,permission_classes
 from .serializers import UsuarioSerializer
+from rest_framework.permissions import AllowAny
 
 @api_view(['POST'])
+@permission_classes([AllowAny]) 
 def registro(request):
     if request.method == 'POST':
         try:
